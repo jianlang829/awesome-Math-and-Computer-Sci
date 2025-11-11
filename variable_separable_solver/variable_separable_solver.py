@@ -1,14 +1,11 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-variable_separable_solver.py
-求解形如 dy/dx = f(x) * g(y) 的变量分离型一阶常微分方程（数值方法）
-严格流程：分离变量（1/g(y) dy = f(x) dx）→ 两端数值积分（scipy.integrate.quad）
-→ 反求 y(x)（用根求解 brentq）。
+'''variable_separable_solver.py
+求解形如 dy/dx = f(x) * g(y) 的变量分离型一阶常微分方程(数值方法)
+严格流程:分离变量(1/g(y) dy = f(x) dx)→ 两端数值积分(scipy.integrate.quad)
+→ 反求 y(x)(用根求解 brentq)。
 并使用 solve_ivp (RK45) 作为基准解比较，绘图并计算 RMSE。
-依赖：numpy, matplotlib, scipy
-安装：pip install numpy matplotlib scipy
-"""
+依赖:numpy, matplotlib, scipy
+安装:pip install --upgrade numpy matplotlib scipy
+'''
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -18,19 +15,19 @@ from scipy.integrate import solve_ivp
 import sys
 
 '''在使用 Python 的 Matplotlib 库进行数据可视化时，你可能会遇到中文显示为方框或乱码的问题。这是因为 Matplotlib 默认字体配置不支持中文。本教程将提供多种方法，从简单快捷到永久配置，帮你彻底解决 Matplotlib 中文乱码问题，让你的图表完美展示中文信息。
-参考：https://zhuanlan.zhihu.com/p/30790786209'''
+参考致谢:https://zhuanlan.zhihu.com/p/30790786209'''
 # 设置全局字体为 SimHei (黑体) 或其他中文字体
 plt.rcParams['font.sans-serif'] = ['Microsoft YaHei']  # ['Microsoft YaHei'] 微软雅黑 ['FangSong'] (仿宋) ['KaiTi'] (楷体)等
 plt.rcParams['axes.unicode_minus'] = False   # 解决负号 '-' 显示为方块的问题
 
-# ----------------------- 参数设置模块（可修改区域） -----------------------
+# ----------------------- 参数设置模块(可修改区域) -----------------------
 # 在这里直接修改 f_x(x) 和 g_y(y) 的表达式
 # 必须保证这两个函数在求解区间上可积且数值上合理
 
-# 示例选择（设置为 1 启用示例1，设置为 2 启用示例2）
-EXAMPLE = 1  # 默认启用示例1；将其改为 2 可切换到示例2（并参考下方示例2替换说明）
+# 示例选择(设置为 1 启用示例1，设置为 2 启用示例2)
+EXAMPLE = 1  # 默认启用示例1；将其改为 2 可切换到示例2(并参考下方示例2替换说明)
 
-# 示例1： dy/dx = x * y
+# 示例1: dy/dx = x * y
 def f_x(x):
     # 这里修改 f(x)
     return x
@@ -39,27 +36,39 @@ def g_y(y):
     # 这里修改 g(y)
     return y
 
-# 如果要使用示例2（dy/dx = sin(x)*(1+y^2)），请把上面的 f_x/g_y 替换为：
+# 如果要使用示例2(dy/dx = sin(x)*(1+y^2))，请把上面的 f_x/g_y 替换为:
 # def f_x(x):
 #     return np.sin(x)
 # def g_y(y):
 #     return 1 + y**2
-# 或者将 EXAMPLE = 2，然后在下方参数配置里替换为示例2（已给出说明）
+# 或者将 EXAMPLE = 2，然后在下方参数配置里替换为示例2(已给出说明)
 
-# 初始条件与求解参数（可修改）
-x0 = 0.0         # 初始 x（或求解区间起点）
-y0 = 1.0         # 初始 y（必须满足 g_y(y0) != 0）
+# 初始条件与求解参数(可修改)
+x0 = 0.0         # 初始 x(或求解区间起点)
+y0 = 1.0         # 初始 y(必须满足 g_y(y0) != 0)
 x_end = 2.0      # 求解区间终点
-n_steps = 200    # 迭代步数（步长 h 自动计算为 (x_end-x0)/n_steps ）
+n_steps = 200    # 迭代步数(步长 h 自动计算为 (x_end-x0)/n_steps )
+'''步长和迭代步数的关系
+假设你要从 x0(起点)走到 x_end(终点)，这段路程就是 “求解区间”。
+迭代步数(n_steps)：你走的 “总步数”(比如 200 步)。
+步长(h)：你每一步迈出去的 “距离”(比如每步走 0.05 米)。
+两者的关系就是：步长 h = 总路程(x_end - x0)÷ 迭代步数(n_steps)
+为什么这俩参数影响误差？
+这里是积分，分得越细（即步长短步数多），越贴合真实，误差越小'''
 # -------------------------------------------------------------------------
 
 # ----------------------- 合法性检查 -----------------------
 if g_y(y0) == 0:
-    print("错误：初始值 y0 导致 g(y0) == 0，会在分离变量时导致除以零。请更换 y0 或修改 g_y(y)。")
+    print("错误:初始值 y0 导致 g(y0) == 0，会在分离变量时导致除以零。请更换 y0 或修改 g_y(y)。")
     sys.exit(1)
 
 # 设置 x 网格
 xs = np.linspace(x0, x_end, n_steps + 1)
+'''np.linspace()：NumPy 库的一个函数，作用是 “在两个数之间，均匀地拉出一串数”（比如在 1 和 11 之间，均匀拉 201 个数）。
+x0：起点（比如你之前的初始 x 值 1）。
+x_end：终点（比如你要求解到的 x 值 11）。
+n_steps + 1：要生成的 “点数”（比如迭代步数 n_steps=200，就生成 200+1=201 个点）。
+xs：最终得到的 “x 值列表”（一个包含 201 个均匀分布 x 的数组）。'''
 
 # ----------------------- 核心求解函数模块 -----------------------
 # 计算 G(x) = \int_{x0}^{x} f(s) ds
@@ -68,17 +77,34 @@ def G_of_x(x):
     val, err = quad(lambda s: f_x(s), x0, x, limit=200)
     return val
 
+'''你要解的方程是 dy/dx = f(x)g(y)，分离变量后是 1/g(y)dy = f(x)dx。两边积分后会得到：∫(y0到y) 1/g(t)dt = ∫(x0到x) f(s)ds + C（积分常数）。
+而这个 G_of_x(x) 函数，就是专门计算右边的 ∫(x0到x) f(s)ds —— 简单说，它的作用是 “给一个 x，就返回 f (x) 从起点 x0 到这个 x 的积分结果”。'''
+
+'''def G_of_x(x):：定义一个函数，输入是任意 x 值，输出是积分结果。
+quad(...)：scipy 库的数值积分函数，专门用来计算定积分（因为有些 f (x) 的积分没有解析解，只能用数值方法逼近）。
+lambda s: f_x(s)：积分的被积函数，就是你定义的 f_x（比如示例 1 里的 f_x=x，这里就相当于 “对 s 求积分，被积函数是 s”）。
+x0 和 x：积分的上下限 —— 从 x0（初始 x 值）积分到输入的 x。
+limit=200：积分的迭代次数上限，设得高一点能提高积分精度（避免积分本身出错）。
+val, err = quad(...)：quad 返回两个值，val 是积分的结果（我们要的），err 是积分的误差估计（可以忽略，重点用 val）。
+return val：函数最终返回积分结果，也就是 G(x) = ∫(x0到x) f(s)ds。'''
+
+'''满足变量分离的积分要求：分离变量后右边的积分是 “随 x 变化的”，每个 x 都对应一个积分值，G_of_x(x) 就是高效计算这个值的工具。'''
+
+'''适配任意 f (x)：不管 f (x) 能不能用公式算出解析积分（比如 f (x)=e^(-x²) 就没有初等解析解），quad 都能通过数值方法算出近似值，让代码能通用。'''
+
+'''为后续求 y 铺路：分离变量后的左边积分是关于 y 的，知道了右边的积分结果（G (x)），才能通过根求解（brentq）反推出对应的 y 值。'''
+
 # 计算 F(y) = \int_{y0}^{y} 1/g(t) dt
 def F_of_y(y):
     # integrand = 1 / g_y(t)
     def integrand(t):
         gt = g_y(t)
         if gt == 0:
-            # 为避免除零抛出，返回大型数值（quad 在遇到真正奇异点可能报错）
+            # 为避免除零抛出，返回大型数值(quad 在遇到真正奇异点可能报错)
             # 但更稳妥的做法是让 quad 发现并报错，由上层捕获
             raise ZeroDivisionError(f"g(y) 在 t={t} 处为零，积分发散或不可直接计算。")
         return 1.0 / gt
-    # quad 支持上下限反向（会返回负值）
+    # quad 支持上下限反向(会返回负值)
     val, err = quad(integrand, y0, y, limit=200)
     return val
 
@@ -93,20 +119,20 @@ def solve_by_separation(xs, y0):
     # 预计算 G(x) 对每个 x
     Gs = np.array([G_of_x(x) for x in xs])
 
-    # 根求解区间（来自要求）：以 [y0 - 100, y0 + 100] 为初始搜索区间
+    # 根求解区间(来自要求):以 [y0 - 100, y0 + 100] 为初始搜索区间
     global_search_low = y0 - 100.0
     global_search_high = y0 + 100.0
 
-    # 为每个 x（从索引1开始）求出 y，使得 F(y) = G(x)
+    # 为每个 x(从索引1开始)求出 y，使得 F(y) = G(x)
     for i in range(1, len(xs)):
         rhs = Gs[i]  # 这是 F(y) 的目标值
-        # 特殊情况：如果 rhs == 0（即 x == x0），则 y = y0
+        # 特殊情况:如果 rhs == 0(即 x == x0)，则 y = y0
         if abs(rhs) < 1e-15:
             ys[i] = y0
             continue
 
         # 为了稳定求根，先在 global 区间内做采样，寻找符号变化的子区间
-        N_samples = 400  # 采样点数（可调整，越多越稳健但慢）
+        N_samples = 400  # 采样点数(可调整，越多越稳健但慢)
         sample_points = np.linspace(global_search_low, global_search_high, N_samples)
         H_vals = []
         finite_flags = []
@@ -149,11 +175,11 @@ def solve_by_separation(xs, y0):
                     break
                 except Exception as e:
                     # 如果 brentq 失败，继续尝试下一个符号变化区间
-                    # print(f"brentq 在区间 ({a}, {b}) 失败：{e}")
+                    # print(f"brentq 在区间 ({a}, {b}) 失败:{e}")
                     continue
 
         if not bracket_found:
-            # 如果没有在初始全局区间找到符号变化，尝试扩展搜索区间（线性扩展两倍）
+            # 如果没有在初始全局区间找到符号变化，尝试扩展搜索区间(线性扩展两倍)
             expand_factor = 2.0
             tries = 0
             max_tries = 3
@@ -202,20 +228,20 @@ def solve_by_separation(xs, y0):
                 tries += 1
 
         if not bracket_found:
-            raise RuntimeError(f"在为 x={xs[i]:.6g} 求解 y 时，无法在 [{global_search_low}, {global_search_high}]（及扩展区间）中找到使 F(y)-G(x) 有符号变化的区间，无法用 brentq 求根。"
-                               " 可能原因：g(y) 在区间内有奇点，或解超出搜索区间范围。请扩大搜索区间或检查 g(y)。")
+            raise RuntimeError(f"在为 x={xs[i]:.6g} 求解 y 时，无法在 [{global_search_low}, {global_search_high}](及扩展区间)中找到使 F(y)-G(x) 有符号变化的区间，无法用 brentq 求根。"
+                               " 可能原因:g(y) 在区间内有奇点，或解超出搜索区间范围。请扩大搜索区间或检查 g(y)。")
 
         ys[i] = y_root
 
     return ys
 
-# ----------------------- 基准验证模块（RK45） -----------------------
+# ----------------------- 基准验证模块(RK45) -----------------------
 def solve_by_rk45(x0, y0, x_end, xs):
     def rhs(x, y):
         return f_x(x) * g_y(y)
     sol = solve_ivp(rhs, (x0, x_end), [y0], method='RK45', t_eval=xs, rtol=1e-9, atol=1e-12)
     if not sol.success:
-        raise RuntimeError("solve_ivp (RK45) 未能成功求解： " + str(sol.message))
+        raise RuntimeError("solve_ivp (RK45) 未能成功求解: " + str(sol.message))
     return sol.y[0]
 
 # ----------------------- 结果可视化与误差计算模块 -----------------------
@@ -223,7 +249,7 @@ def compute_rmse(a, b):
     return np.sqrt(np.mean((a - b) ** 2))
 
 def visualize_and_report(xs, ys_sep, ys_rk, example=1, analytic_solution=None):
-    # 计算并打印 RMSE（保留10位小数）
+    # 计算并打印 RMSE(保留10位小数)
     rmse_val = compute_rmse(ys_sep, ys_rk)
     print(f"分离变量数值解 与 RK45 数值解 的 RMSE = {rmse_val:.10f}")
 
@@ -234,7 +260,7 @@ def visualize_and_report(xs, ys_sep, ys_rk, example=1, analytic_solution=None):
     if example == 1 and analytic_solution is not None:
         ys_analytic = analytic_solution(xs)
         plt.plot(xs, ys_analytic, ':', label="解析解", lw=2)
-        # 额外计算并打印 分离变量数值解 与 解析解 的误差（示例1的要求）
+        # 额外计算并打印 分离变量数值解 与 解析解 的误差(示例1的要求)
         abs_err = np.abs(ys_sep - ys_analytic)
         max_err = np.max(abs_err)
         mean_err = np.mean(abs_err)
@@ -249,17 +275,17 @@ def visualize_and_report(xs, ys_sep, ys_rk, example=1, analytic_solution=None):
     plt.tight_layout()
     plt.savefig("Figure_1.png")
 
-# ----------------------- 主程序（执行流程） -----------------------
+# ----------------------- 主程序(执行流程) -----------------------
 def main():
-    # 如果需要按示例2切换 f_x/g_y，可在此处替换函数定义（演示说明）
+    # 如果需要按示例2切换 f_x/g_y，可在此处替换函数定义(演示说明)
     if EXAMPLE == 2:
-        # 示例2：dy/dx = sin(x) * (1 + y^2)
-        # 说明：要切换到示例2，请解除下面两行的注释（或者直接在上方参数区域替换 f_x 和 g_y）
+        # 示例2:dy/dx = sin(x) * (1 + y^2)
+        # 说明:要切换到示例2，请解除下面两行的注释(或者直接在上方参数区域替换 f_x 和 g_y)
         # global f_x, g_y
         # f_x = lambda x: np.sin(x); g_y = lambda y: 1 + y**2
         pass
 
-    print("开始用分离变量法计算（数值积分 + 根求解）...")
+    print("开始用分离变量法计算(数值积分 + 根求解)...")
     ys_sep = solve_by_separation(xs, y0)
     print("分离变量法计算完成。")
 
@@ -270,7 +296,7 @@ def main():
     # 若为示例1，构造解析解函数
     analytic_solution = None
     if EXAMPLE == 1:
-        # 解析解：dy/dx = x*y -> ln(y) - ln(y0) = (x^2 - x0^2)/2
+        # 解析解:dy/dx = x*y -> ln(y) - ln(y0) = (x^2 - x0^2)/2
         def analytic_sol(x_arr):
             return y0 * np.exp((x_arr ** 2 - x0 ** 2) / 2.0)
         analytic_solution = analytic_sol
