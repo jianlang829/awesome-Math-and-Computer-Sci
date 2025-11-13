@@ -20,9 +20,11 @@
 
 优化前（偏差显著）：分离变量解与参考解偏离明显 📉
 
+<img width="1000" height="600" alt="Figure_2" src="https://github.com/user-attachments/assets/b29420f7-4cc4-4f10-8951-73108871af24" />
 
 优化后（高度一致）：分离变量解与解析解完全重合 📈
 
+<img width="1000" height="600" alt="Figure_1" src="https://github.com/user-attachments/assets/bd7035e2-82fc-4913-8427-17f4b5ff8731" />
 
 ## ✅ 3. 核心结论
 
