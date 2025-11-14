@@ -1,4 +1,35 @@
 # -*- coding: utf-8 -*-
+'''tree /f
+文件夹 PATH 列表
+卷序列号为 D204-C902
+C:.
+│  .gitignore
+│  LICENSE
+│  README.md
+│  __init__.py
+│
+├─homogeneous_solver
+│  │  homogeneous_solver.py
+│  │  homogeneous_solver_0.py
+│  │
+│  └─__pycache__
+│          homogeneous_solver.cpython-312.pyc
+│
+├─plots
+│      Figure_20251114_152229.png
+│
+└─variable_separable_solver
+    │  Figure_1.png
+    │  Figure_2.png
+    │  q1.md
+    │  separate.py
+    │  variable_separable_solver.py
+    │  variable_separable_solver_0.py
+    │  variable_separable_solver_00.py
+    │
+    └─__pycache__
+            variable_separable_solver.cpython-312.pyc'''
+'''python -m variable_separable_solver.variable_separable_solver'''
 '''
 variable_separable_solver.py
 求解形如 dy/dx = f(x) * g(y) 的通用变量分离型一阶常微分方程(数值方法，积分 + 求根，非解析方法)
@@ -13,7 +44,9 @@ variable_separable_solver.py
 作者:jianlang829,lang306
 '''
 
+import os
 import time
+from datetime import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import quad
@@ -130,6 +163,7 @@ def solve_by_separation(f_x, g_y, x0=_default_x0, y0=_default_y0,
         H_vals = []
         finite_flags = []
 
+        # print(f"x={xs[i]:.6g}，rhs={rhs:.1e}")
         for sp in sample_points:
             try:
                 hv = H_of_y(sp, rhs)
@@ -225,7 +259,8 @@ def solve_by_separation(f_x, g_y, x0=_default_x0, y0=_default_y0,
             )
 
         ys[i] = y_root
-
+        
+    # print(ys)
     return xs, ys
 
 # ----------------------- 基准验证模块(RK45) -----------------------
@@ -266,7 +301,10 @@ def visualize_and_report(xs, ys_sep, ys_rk, example=1, analytic_solution=None, s
         plt.legend()
         plt.grid(True)
         plt.tight_layout()
-        plt.savefig("Figure_1.png")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        # 确保文件夹存在，不存在则创建
+        os.makedirs("plots", exist_ok=True)
+        plt.savefig(f"plots/Figure_{timestamp}.png")
     else:
         # 即使不显示图形，仍在示例1时输出解析解误差信息（如果 analytic_solution 提供）
         if example == 1 and analytic_solution is not None:

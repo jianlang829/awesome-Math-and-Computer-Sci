@@ -245,7 +245,7 @@ def visualize_and_report(xs, ys_sep, ys_rk, example=1, analytic_solution=None):
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig("Figure_2.png")
+    plt.savefig("plots/Figure_2.png")
 
 # ----------------------- 主程序（执行流程） -----------------------
 def main():
