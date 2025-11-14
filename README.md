@@ -159,6 +159,8 @@ $\frac{dy}{dx} = \frac{y}{x} + 1$（对应 $g(u) = u + 1$，$u = y/x$）
 
 ## 📌 4. 可视化说明
 
+<img width="1000" height="600" alt="Figure_20251114_152229" src="https://github.com/user-attachments/assets/6e614efc-1d4b-4feb-b3a1-d39353a42ed7" />
+
 - 蓝线：分离变量数值解（经 $y = u \cdot x$ 回代）
 - 红线：RK45参考解
 - 绿线：解析解
