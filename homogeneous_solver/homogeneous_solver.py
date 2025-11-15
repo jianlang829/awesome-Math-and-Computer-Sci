@@ -58,6 +58,7 @@ homogeneous_solver.py
 - solve_homogeneous(g, *, x0, y0, x_end, n_steps=..., **kwargs)
   g 可以是对 u 的可调用函数，也可以是以 'u' 为变量的字符串表达式（可使用 numpy np 和 math）。
 - main() 提供一个简单的命令行演示。
+- from homogeneous_solver.homogeneous_solver import solve_homogeneous
 
 注意: x0 不能为 0，因为 f(x)=1/x 在 x=0 处有奇点。
 依赖库：sympy（需提前 pip install sympy）
@@ -465,6 +466,7 @@ def solve_homogeneous(
     # capture arbitrary kwargs to forward to solve_variable_separable
     **kwargs,
 ):
+    '''对外调用接口'''
     """
     在区间 [x0, x_end] 上求解 dy/dx = g(y/x)，给定初值 y(x0)=y0。
 
