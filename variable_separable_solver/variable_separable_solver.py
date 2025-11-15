@@ -42,6 +42,7 @@ variable_separable_solver.py
 
 安装:pip install --upgrade numpy matplotlib scipy
 作者:jianlang829,lang306
+作者给自己的提示：xs是x0到x_end，均匀取的几百个x，组成的列表。gs是x0到每个xs的关于f(x)的定积分组成的列表。gs用g_x(s),x0,x积分，limit是这一段，积分最大能均匀分多少段。n_samples是y0到每个y这一段，积分最大能均匀分成多少段。
 '''
 
 import os
@@ -164,6 +165,7 @@ def solve_by_separation(f_x, g_y, x0=_default_x0, y0=_default_y0,
         finite_flags = []
 
         # print(f"x={xs[i]:.6g}，rhs={rhs:.1e}")
+        # 作者给自己的提示：这里是在过滤掉无效点（奇点等）（坏点）
         for sp in sample_points:
             try:
                 hv = H_of_y(sp, rhs)
@@ -181,12 +183,15 @@ def solve_by_separation(f_x, g_y, x0=_default_x0, y0=_default_y0,
         bracket_found = False
         y_root = None
         for j in range(N - 1):
+            # 作者给自己的提示：只要一个坏点就不要
             if not (finite_flags[j] and finite_flags[j + 1]):
                 continue
+            # 作者给自己的提示：过关，两个连续点都是好点，前一个叫v1，后一个叫v2
             v1 = H_vals[j]
             v2 = H_vals[j + 1]
 
             # 如果其中一个点的H(y)接近0，直接视为根
+            # 作者给自己的提示：v=0，即hy=0，即找到了我们要的y，结束们就要这个点，放入ys
             if v1 == 0.0:
                 y_root = sample_points[j]
                 bracket_found = True
@@ -196,16 +201,21 @@ def solve_by_separation(f_x, g_y, x0=_default_x0, y0=_default_y0,
                 bracket_found = True
                 break
             if v1 * v2 < 0:
+                # 作者的提示：v1，v2换个名字a，b
                 a = sample_points[j]
                 b = sample_points[j + 1]
                 try:
-                    y_root = brentq(lambda yy: H_of_y(yy, rhs), a, b, maxiter=200)
+                    # 作者给自己的提示：v1和v2之间找两百个点，判断是否让hy=0，如果是就找到了，放进ys
+                    y_root = brentq(lambda yy: H_of_y(yy, rhs), a, b, maxiter=500)
                     bracket_found = True
                     break
                 except Exception:
+                    # 作者给自己的提示：出现问题我就去找其他的两个连续的好点
                     continue
 
         # 如果没有在初始动态区间找到符号变化，尝试以 x0 为基准扩展区间(与原逻辑保持一致)
+        # 作者的提示：还是没找到，我就采取下面措施
+        '''作者的足迹：看到这里了，接着这里看√'''
         if not bracket_found:
             tries = 0
             expanded_low = search_low
@@ -245,7 +255,7 @@ def solve_by_separation(f_x, g_y, x0=_default_x0, y0=_default_y0,
                         a = sample_points[j]
                         b = sample_points[j + 1]
                         try:
-                            y_root = brentq(lambda yy: H_of_y(yy, rhs), a, b, maxiter=200)
+                            y_root = brentq(lambda yy: H_of_y(yy, rhs), a, b, maxiter=500)
                             bracket_found = True
                             break
                         except Exception:
@@ -286,15 +296,15 @@ def visualize_and_report(xs, ys_sep, ys_rk, example=1, analytic_solution=None, s
         plt.figure(figsize=(10, 6))
         plt.plot(xs, ys_sep, label="分离变量数值解", lw=2)
         plt.plot(xs, ys_rk, '--', label="RK45 数值解", lw=2)
-        if example == 1 and analytic_solution is not None:
-            ys_analytic = analytic_solution(xs)
-            plt.plot(xs, ys_analytic, ':', label="解析解", lw=2)
-            # 额外计算并打印 分离变量数值解 与 解析解 的误差(示例1的要求)
-            abs_err = np.abs(ys_sep - ys_analytic)
-            max_err = np.max(abs_err)
-            mean_err = np.mean(abs_err)
-            print(f"分离变量数值解 与 解析解 的 最大绝对误差 = {max_err:.10f}")
-            print(f"分离变量数值解 与 解析解 的 平均绝对误差 = {mean_err:.10f}")
+        # if example == 1 and analytic_solution is not None:
+        #     ys_analytic = analytic_solution(xs)
+        #     plt.plot(xs, ys_analytic, ':', label="解析解", lw=2)
+        #     # 额外计算并打印 分离变量数值解 与 解析解 的误差(示例1的要求)
+        #     abs_err = np.abs(ys_sep - ys_analytic)
+        #     max_err = np.max(abs_err)
+        #     mean_err = np.mean(abs_err)
+        #     print(f"分离变量数值解 与 解析解 的 最大绝对误差 = {max_err:.10f}")
+        #     print(f"分离变量数值解 与 解析解 的 平均绝对误差 = {mean_err:.10f}")
         plt.xlabel("x")
         plt.ylabel("y")
         plt.title("变量分离法 与 RK45 解的比较")
