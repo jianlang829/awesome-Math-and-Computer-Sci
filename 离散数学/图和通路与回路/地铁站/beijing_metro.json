@@ -1,0 +1,45 @@
+[
+  { "name": "苹果园", "lines": ["1号线"], "neighbors": ["古城"] },
+  { "name": "古城", "lines": ["1号线"], "neighbors": ["苹果园", "八角游乐园"] },
+  { "name": "八角游乐园", "lines": ["1号线"], "neighbors": ["古城", "八宝山"] },
+  {
+    "name": "八宝山",
+    "lines": ["1号线"],
+    "neighbors": ["八角游乐园", "玉泉路"]
+  },
+  { "name": "玉泉路", "lines": ["1号线"], "neighbors": ["八宝山", "五棵松"] },
+  { "name": "五棵松", "lines": ["1号线"], "neighbors": ["玉泉路", "万寿路"] },
+  { "name": "万寿路", "lines": ["1号线"], "neighbors": ["五棵松", "公主坟"] },
+  {
+    "name": "公主坟",
+    "lines": ["1号线"],
+    "neighbors": ["万寿路", "军事博物馆"]
+  },
+  {
+    "name": "军事博物馆",
+    "lines": ["1号线"],
+    "neighbors": ["公主坟", "木樨地"]
+  },
+  {
+    "name": "木樨地",
+    "lines": ["1号线"],
+    "neighbors": ["军事博物馆", "南礼士路"]
+  },
+  { "name": "南礼士路", "lines": ["1号线"], "neighbors": ["木樨地", "复兴门"] },
+  { "name": "复兴门", "lines": ["1号线"], "neighbors": ["南礼士路", "西单"] },
+  { "name": "西单", "lines": ["1号线"], "neighbors": ["复兴门", "天安门西"] },
+  { "name": "天安门西", "lines": ["1号线"], "neighbors": ["西单", "天安门东"] },
+  {
+    "name": "天安门东",
+    "lines": ["1号线"],
+    "neighbors": ["天安门西", "王府井"]
+  },
+  { "name": "王府井", "lines": ["1号线"], "neighbors": ["天安门东", "东单"] },
+  { "name": "东单", "lines": ["1号线"], "neighbors": ["王府井", "建国门"] },
+  { "name": "建国门", "lines": ["1号线"], "neighbors": ["东单", "永安里"] },
+  { "name": "永安里", "lines": ["1号线"], "neighbors": ["建国门", "国贸"] },
+  { "name": "国贸", "lines": ["1号线"], "neighbors": ["永安里", "大望路"] },
+  { "name": "大望路", "lines": ["1号线"], "neighbors": ["国贸", "四惠"] },
+  { "name": "四惠", "lines": ["1号线"], "neighbors": ["大望路", "四惠东"] },
+  { "name": "四惠东", "lines": ["1号线"], "neighbors": ["四惠"] }
+]
